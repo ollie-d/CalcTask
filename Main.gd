@@ -1,6 +1,15 @@
 extends Node2D
-
 signal show_answer
+
+# TODO:
+# - Enter for submit button
+# - Bigger calculator size
+# - Hide question timer and add a skip button
+#    - Skip button can only be used in the first N seconds
+# - Maximum question delay on wheel for any question
+#    - Take maximum time minus time spent on problem
+#    * MAX TIME MINUS TIME TAKEN ENTERING VALUES
+
 
 # Create logging variables
 
@@ -15,7 +24,7 @@ var qs = preload("res://questions.gd")
 var questions
 var question = 0
 var feedbackColor = Color(0, 1, 0, 1);
-var CALC_DELAY = 1
+var CALC_DELAY = 0.1
 var MAX_DELAY = 3
 var QUESTION_TIME = 20;
 var delta_qtime = 0.1
@@ -23,6 +32,7 @@ var qtime = 0;
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	set_process_input(true)
 	var questions_ = qs.new() # load questions
 	# TEMP: Set to all levels and shuffle
 	questions = questions_.lvl1 # TEMP: set questions to level X
@@ -36,7 +46,7 @@ func _ready():
 	questions.shuffle()
 	
 	$problem/questionTimeProg.value = $problem/questionTimeProg.max_value
-	$questionTimer.start(delta_qtime)
+	#$questionTimer.start(delta_qtime)
 	$problem/answer.text = ''
 	$problem.text = questions[question][0]
 	$taskTimer.start(1)
@@ -52,6 +62,10 @@ func _process(delta):
 	$wheel.rotation_degrees += 3
 	if $wheel.rotation_degrees == 360:
 		$wheel.rotation_degrees = 0 
+		
+func _input(ev):
+	if ev.is_action_released("ui_accept"):
+		_on_submit_pressed()
 
 func _on_Button_pressed():
 	$calcTimer.start(CALC_DELAY) # delay calc opening
@@ -87,18 +101,18 @@ func next_question():
 	$problem/answer.grab_focus()
 	
 	# Refresh questionTimer
-	$questionTimer.stop()
+	#$questionTimer.stop()
 	#$problem/questionTimeProg.set_value($problem/questionTimeProg.max_value)
-	$problem/questionTimeProg.value = $problem/questionTimeProg.max_value
-	$questionTimer.start(delta_qtime)
+	#$problem/questionTimeProg.value = $problem/questionTimeProg.max_value
+	#$questionTimer.start(delta_qtime)
 
 func _on_submit_pressed():
 	if int($problem/answer.text) == questions[question][1]:
 		$scoreLabel/score.text = str(int($scoreLabel/score.text)+1)
 		$feedback.bbcode_text = '[color=#00FF00]+1[/color]'
 	else:
-		$scoreLabel/score.text = str(int($scoreLabel/score.text)-2)
-		$feedback.bbcode_text = '[color=#FF0000]-2[/color]'
+		$scoreLabel/score.text = str(int($scoreLabel/score.text)-1)
+		$feedback.bbcode_text = '[color=#FF0000]-1[/color]'
 	if int($problem/answer.text) == 69:
 		$easterEgg.modulate.a = 1
 		$easterEgg.visible = true

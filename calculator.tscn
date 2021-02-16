@@ -5,23 +5,27 @@
 [ext_resource path="res://fonts/Calculator.ttf" type="DynamicFontData" id=4]
 
 [sub_resource type="DynamicFont" id=1]
-size = 24
+size = 32
 font_data = ExtResource( 4 )
 
 [sub_resource type="DynamicFont" id=2]
+size = 32
 font_data = ExtResource( 3 )
 
 [sub_resource type="DynamicFont" id=3]
+size = 32
 font_data = ExtResource( 3 )
 
 [sub_resource type="DynamicFont" id=4]
+size = 32
 font_data = ExtResource( 3 )
 
 [node name="Calculator" type="PanelContainer"]
-margin_left = 10.0562
-margin_top = 9.05612
-margin_right = 123.056
-margin_bottom = 193.056
+margin_left = 11.0
+margin_top = 9.0
+margin_right = 157.0
+margin_bottom = 276.0
+rect_scale = Vector2( 2, 2 )
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_group_": true,
@@ -31,8 +35,8 @@ __meta__ = {
 [node name="Panel" type="Panel" parent="."]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 106.0
-margin_bottom = 177.0
+margin_right = 139.0
+margin_bottom = 260.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
 margin_left = 2.24493
@@ -44,146 +48,147 @@ __meta__ = {
 }
 
 [node name="Display" type="LineEdit" parent="Panel/VBoxContainer"]
-margin_right = 95.0
-margin_bottom = 38.0
+margin_right = 127.0
+margin_bottom = 46.0
 custom_fonts/font = SubResource( 1 )
+custom_colors/font_color_uneditable = Color( 1, 1, 1, 1 )
 text = "0"
 editable = false
 placeholder_text = "1234"
 placeholder_alpha = 1.0
 
 [node name="HSeparator" type="HSeparator" parent="Panel/VBoxContainer"]
-margin_top = 42.0
-margin_right = 95.0
-margin_bottom = 46.0
+margin_top = 50.0
+margin_right = 127.0
+margin_bottom = 54.0
 
 [node name="Pad" type="HBoxContainer" parent="Panel/VBoxContainer"]
-margin_top = 50.0
-margin_right = 95.0
-margin_bottom = 166.0
+margin_top = 58.0
+margin_right = 127.0
+margin_bottom = 250.0
 
 [node name="NumPad" type="GridContainer" parent="Panel/VBoxContainer/Pad"]
-margin_right = 68.0
-margin_bottom = 116.0
+margin_right = 91.0
+margin_bottom = 192.0
 columns = 3
 
 [node name="Button" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_right = 20.0
-margin_bottom = 26.0
+margin_right = 27.0
+margin_bottom = 45.0
 custom_fonts/font = SubResource( 2 )
 text = "7"
 
 [node name="Button1" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_left = 24.0
-margin_right = 44.0
-margin_bottom = 26.0
+margin_left = 31.0
+margin_right = 59.0
+margin_bottom = 45.0
 custom_fonts/font = SubResource( 3 )
 text = "8"
 
 [node name="Button2" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_left = 48.0
-margin_right = 68.0
-margin_bottom = 26.0
+margin_left = 63.0
+margin_right = 91.0
+margin_bottom = 45.0
 custom_fonts/font = SubResource( 3 )
 text = "9"
 
 [node name="Button4" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_top = 30.0
-margin_right = 20.0
-margin_bottom = 56.0
+margin_top = 49.0
+margin_right = 27.0
+margin_bottom = 94.0
 custom_fonts/font = SubResource( 3 )
 text = "4"
 
 [node name="Button5" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_left = 24.0
-margin_top = 30.0
-margin_right = 44.0
-margin_bottom = 56.0
+margin_left = 31.0
+margin_top = 49.0
+margin_right = 59.0
+margin_bottom = 94.0
 custom_fonts/font = SubResource( 3 )
 text = "5"
 
 [node name="Button6" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_left = 48.0
-margin_top = 30.0
-margin_right = 68.0
-margin_bottom = 56.0
+margin_left = 63.0
+margin_top = 49.0
+margin_right = 91.0
+margin_bottom = 94.0
 custom_fonts/font = SubResource( 3 )
 text = "6"
 
 [node name="Button8" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_top = 60.0
-margin_right = 20.0
-margin_bottom = 86.0
+margin_top = 98.0
+margin_right = 27.0
+margin_bottom = 143.0
 custom_fonts/font = SubResource( 3 )
 text = "1"
 
 [node name="Button9" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_left = 24.0
-margin_top = 60.0
-margin_right = 44.0
-margin_bottom = 86.0
+margin_left = 31.0
+margin_top = 98.0
+margin_right = 59.0
+margin_bottom = 143.0
 custom_fonts/font = SubResource( 3 )
 text = "2"
 
 [node name="Button10" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_left = 48.0
-margin_top = 60.0
-margin_right = 68.0
-margin_bottom = 86.0
+margin_left = 63.0
+margin_top = 98.0
+margin_right = 91.0
+margin_bottom = 143.0
 custom_fonts/font = SubResource( 3 )
 text = "3"
 
 [node name="Button12" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_top = 90.0
-margin_right = 20.0
-margin_bottom = 116.0
+margin_top = 147.0
+margin_right = 27.0
+margin_bottom = 192.0
 custom_fonts/font = SubResource( 3 )
 disabled = true
 
 [node name="Button13" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_left = 24.0
-margin_top = 90.0
-margin_right = 44.0
-margin_bottom = 116.0
+margin_left = 31.0
+margin_top = 147.0
+margin_right = 59.0
+margin_bottom = 192.0
 custom_fonts/font = SubResource( 3 )
 text = "0"
 
 [node name="Button14" type="Button" parent="Panel/VBoxContainer/Pad/NumPad"]
-margin_left = 48.0
-margin_top = 90.0
-margin_right = 68.0
-margin_bottom = 116.0
+margin_left = 63.0
+margin_top = 147.0
+margin_right = 91.0
+margin_bottom = 192.0
 custom_fonts/font = SubResource( 3 )
 text = "."
 
 [node name="OperationsPad" type="VBoxContainer" parent="Panel/VBoxContainer/Pad"]
-margin_left = 72.0
-margin_right = 94.0
-margin_bottom = 116.0
+margin_left = 95.0
+margin_right = 127.0
+margin_bottom = 192.0
 
 [node name="Button3" type="Button" parent="Panel/VBoxContainer/Pad/OperationsPad"]
-margin_right = 22.0
-margin_bottom = 26.0
+margin_right = 32.0
+margin_bottom = 45.0
 custom_fonts/font = SubResource( 4 )
 text = "C"
 
 [node name="Button4" type="Button" parent="Panel/VBoxContainer/Pad/OperationsPad"]
-margin_top = 30.0
-margin_right = 22.0
-margin_bottom = 56.0
+margin_top = 49.0
+margin_right = 32.0
+margin_bottom = 94.0
 custom_fonts/font = SubResource( 4 )
 text = "+"
 
 [node name="Button7" type="Button" parent="Panel/VBoxContainer/Pad/OperationsPad"]
-margin_top = 60.0
-margin_right = 22.0
-margin_bottom = 86.0
+margin_top = 98.0
+margin_right = 32.0
+margin_bottom = 143.0
 custom_fonts/font = SubResource( 4 )
 text = "-"
 
 [node name="Button16" type="Button" parent="Panel/VBoxContainer/Pad/OperationsPad"]
-margin_top = 90.0
-margin_right = 22.0
-margin_bottom = 116.0
+margin_top = 147.0
+margin_right = 32.0
+margin_bottom = 192.0
 custom_fonts/font = SubResource( 4 )
 text = "="

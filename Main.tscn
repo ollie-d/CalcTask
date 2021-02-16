@@ -62,8 +62,9 @@ load_path = "res://.import/loading4.png-2be4f49f203ccd0ea0f265df70286fbd.stex"
 script = ExtResource( 2 )
 
 [node name="calculator" parent="." instance=ExtResource( 1 )]
-margin_right = 124.0
-margin_bottom = 194.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 152.0
 
 [node name="calcButton" type="Button" parent="."]
 margin_left = 896.622
@@ -107,7 +108,7 @@ margin_right = 424.975
 margin_bottom = 57.0
 custom_fonts/font = SubResource( 3 )
 custom_colors/font_color = Color( 0, 1, 0, 1 )
-text = "300"
+text = "200"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -178,6 +179,7 @@ __meta__ = {
 }
 
 [node name="questionTimeProg" type="TextureProgress" parent="problem"]
+visible = false
 margin_left = 34.0
 margin_top = 64.0
 margin_right = 368.0
@@ -220,7 +222,7 @@ __meta__ = {
 
 [node name="wheel" type="Sprite" parent="."]
 material = SubResource( 9 )
-position = Vector2( 67.2449, 100.576 )
+position = Vector2( 152, 72 )
 scale = Vector2( 0.25, 0.25 )
 texture = SubResource( 10 )
 [connection signal="show_answer" from="." to="calculator" method="_on_Main_show_answer"]
