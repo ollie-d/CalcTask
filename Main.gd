@@ -2,14 +2,8 @@ extends Node2D
 signal show_answer
 
 # TODO:
-# - Enter for submit button
-# - Bigger calculator size
-# - Hide question timer and add a skip button
+# - Add a skip button
 #    - Skip button can only be used in the first N seconds
-# - Maximum question delay on wheel for any question
-#    - Take maximum time minus time spent on problem
-#    * MAX TIME MINUS TIME TAKEN ENTERING VALUES
-
 
 # Create logging variables
 
@@ -20,6 +14,9 @@ signal show_answer
 #	['3+3', 6]
 #]
 
+# Staircasing difficulty and cost of calculator
+# Have fewer classes of problems in order to avoid this non-linear ramp up
+
 var qs = preload("res://questions.gd")
 var questions
 var question = 0
@@ -29,6 +26,7 @@ var MAX_DELAY = 3
 var QUESTION_TIME = 20;
 var delta_qtime = 0.1
 var qtime = 0;
+var random = RandomNumberGenerator.new()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -67,6 +65,46 @@ func _input(ev):
 	if ev.is_action_released("ui_accept"):
 		_on_submit_pressed()
 
+func generate_number(num_dig):
+	# Restrict final digit from being 0, 1, 2 or 5
+	var choices_f = [3, 4, 6, 7, 8, 9]
+	var choices_i = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+	var len_f = len(choices_f)-1
+	var len_i = len(choices_i)-1
+
+	var q = ''
+	for j in range(num_dig-1):
+		q += str(choices_i[random.randi_range(0, len_i)])
+	q += str(choices_f[random.randi_range(0, len_f)])
+	
+	return q
+
+func create_problem(min_dig, max_dig, num_ops, num_min=0, num_max=0):
+	var ops = []
+	for i in range(num_min):
+		ops.append(generate_number(min_dig))
+
+	for i in range(num_max):
+		ops.append(generate_number(max_dig))
+
+	if (num_max + num_min - 1) > num_ops:
+		num_ops = num_max + num_min - 1
+		print('Warning: num_ops smaller than num_max + num_min - 1; using sum - 1 as num_ops')
+
+	# Populate remaining operators
+	for i in range(num_ops - (num_max + num_min - 1)):
+		ops.append(generate_number(random.randi_range(min_dig, max_dig)))
+
+	# Generate label str and compute answer
+	var problem = ''
+	var answer = 0
+	for op in ops:
+		problem += op + '+'
+		answer += int(op)
+	problem = problem.substr(0, len(problem)-1)
+	
+	return [problem, answer]
+	
 func _on_Button_pressed():
 	$calcTimer.start(CALC_DELAY) # delay calc opening
 	$calcButton.disabled = true
