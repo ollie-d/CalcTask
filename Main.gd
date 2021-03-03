@@ -17,13 +17,19 @@ signal show_answer
 # Staircasing difficulty and cost of calculator
 # Have fewer classes of problems in order to avoid this non-linear ramp up
 
-var qs = preload("res://questions.gd")
-var questions
+#var qs = preload("res://questions.gd")
+var questions = []
 var question = 0
 var feedbackColor = Color(0, 1, 0, 1);
-var CALC_DELAY = 0.1
-var MAX_DELAY = 3
+var CALC_DELAY = 0.1 # to open calc
+var MAX_DELAY = 3 # to get answer from equal
 var QUESTION_TIME = 20;
+var BLOCK_SIZE = 11;
+var block_counter = 0; # keep track of where we are in the block
+var num_easy = 5
+var e = [1, 1, 1, 1, 1]
+var h = [1, 1, 2, 2, 1]
+var block_accuracy = 0
 var delta_qtime = 0.1
 var qtime = 0;
 var random = RandomNumberGenerator.new()
@@ -31,18 +37,9 @@ var random = RandomNumberGenerator.new()
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	set_process_input(true)
-	var questions_ = qs.new() # load questions
-	# TEMP: Set to all levels and shuffle
-	questions = questions_.lvl1 # TEMP: set questions to level X
-	questions += questions_.lvl2
-	questions += questions_.lvl3
-	questions += questions_.lvl4
-	questions += questions_.lvl5
-	questions += questions_.lvl6
-	questions += questions_.lvl7
-	randomize()
-	questions.shuffle()
-	
+	random.randomize()
+	questions = generate_block(BLOCK_SIZE, num_easy, e, h)
+
 	$problem/questionTimeProg.value = $problem/questionTimeProg.max_value
 	#$questionTimer.start(delta_qtime)
 	$problem/answer.text = ''
@@ -57,8 +54,8 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	$wheel.rotation_degrees += 3
-	if $wheel.rotation_degrees == 360:
+	$wheel.rotation_degrees += round(0.021/delta) # try to keep this constant
+	if $wheel.rotation_degrees >= 360:
 		$wheel.rotation_degrees = 0 
 		
 func _input(ev):
@@ -79,7 +76,7 @@ func generate_number(num_dig):
 	
 	return q
 
-func create_problem(min_dig, max_dig, num_ops, num_min=0, num_max=0):
+func create_problem(min_dig, max_dig, num_ops, num_min=1, num_max=1):
 	var ops = []
 	for i in range(num_min):
 		ops.append(generate_number(min_dig))
@@ -105,6 +102,18 @@ func create_problem(min_dig, max_dig, num_ops, num_min=0, num_max=0):
 	
 	return [problem, answer]
 	
+func generate_block(block_size, num_easy, e, h):
+	var questions_ = []
+	for j in range(num_easy):
+		questions_.append(create_problem(e[0], e[1], e[2], e[3], e[4]))
+	for j in range(block_size - 1 - num_easy):
+		questions_.append(create_problem(h[0], h[1], h[2], h[3], h[4]))
+	# Final question always easy
+	questions_.shuffle()
+	questions_.append(create_problem(e[0], e[1], e[2], e[3], e[4]))
+	
+	return questions_
+
 func _on_Button_pressed():
 	$calcTimer.start(CALC_DELAY) # delay calc opening
 	$calcButton.disabled = true
@@ -127,22 +136,23 @@ func next_question():
 	$calculator.stored = 0
 	$calculator.currentOp = ""
 	$calculator/Panel/VBoxContainer/Display.set_text(str(0))
-	
+
 	# Increment question
 	question += 1
-	if question >= len(questions):
-		question = 0
 	$problem.text = questions[question][0]
 	$problem/answer.text = ''
-	
-	# Set focus back to answer box for convenience
 	$problem/answer.grab_focus()
-	
-	# Refresh questionTimer
-	#$questionTimer.stop()
-	#$problem/questionTimeProg.set_value($problem/questionTimeProg.max_value)
-	#$problem/questionTimeProg.value = $problem/questionTimeProg.max_value
-	#$questionTimer.start(delta_qtime)
+	if block_counter == BLOCK_SIZE:
+		# If we're just before the final question, calculate next block
+		print('A');
+	elif block_counter == BLOCK_SIZE:
+		print('A')
+	else:
+		#if question >= len(questions):
+		#	question = 0
+		$problem.text = questions[question][0]
+		$problem/answer.text = ''
+		$problem/answer.grab_focus()
 
 func _on_submit_pressed():
 	if int($problem/answer.text) == questions[question][1]:
@@ -151,7 +161,7 @@ func _on_submit_pressed():
 	else:
 		$scoreLabel/score.text = str(int($scoreLabel/score.text)-1)
 		$feedback.bbcode_text = '[color=#FF0000]-1[/color]'
-	if int($problem/answer.text) == 69:
+	if int($problem/answer.text) == 28980 / (60 * 7):
 		$easterEgg.modulate.a = 1
 		$easterEgg.visible = true
 		$easterEggTimer.start(0.05)
