@@ -2,43 +2,64 @@ extends Node2D
 signal show_answer
 
 # TODO:
-# - Add a skip button
-#    - Skip button can only be used in the first N seconds
-# - Create logging variables
-# - Staircasing difficulty and cost of calculator
-# 	-Have fewer classes of problems in order to avoid this non-linear ramp up
+# - Logging variables
+#	- log time of every button/key press in ms
+#	- log every question
+#	- log every answer
+#	- log accuracy
+#	- log mean level
+# Save things in a JSON (dict of ndicts of ndicts...)
+# {
+#	block_1
+#	{
+#		start_time: 1ms
+#		mean_level: 3
+#		q1: 
+#		{
+#			time_left: 300
+#			question_display_time: 2ms
+#			question: '2+3'
+#			correct_answer: 5
+#			user_answer: 5
+#			user_correct: True
+#			answer_time: 20ms
+#			used_calculator: True
+#			score: 1
+#			events: 
+#			[
+#				(press_calc, 1ms),
+#				('calc_3', 2ms),
+#				('calc_+', 3ms),
+#				('calc_2', 4ms),
+#				('calc_=', 5ms),
+#				('key_5', 6ms),
+#				('submit, 7ms)
+#			]
+#		}
+#	}
+#}
 
-#var qs = preload("res://questions.gd")
 var questions = []
 var difficulties = []
 var new_questions = []
 var new_difficulties = []
 var question = 0 # keep track of where we are in the block
 var feedbackColor = Color(0, 1, 0, 1);
-var CALC_DELAY = 0.1 # to open calc
-var MAX_DELAY = 3 # to get answer from equal
+var CALC_DELAY = 0.01 # to open calc
+var MAX_DELAY = 0.01 # to get answer from equal
 var QUESTION_TIME = 20;
-var BLOCK_SIZE = 11;
-var TAR_CALC_USE_HARD = 5; # we want the user to use the calc 5 times
-var TAR_CALC_USE_EASY = 0;
-var num_easy = 5
-var num_hard = BLOCK_SIZE - 1 - num_easy
 var block_accuracy = 0
-var calc_use_easy = 0
-var calc_use_hard = 0
 var delta_qtime = 0.1
 var qtime = 0;
 var random = RandomNumberGenerator.new()
 
 # Define levels
-var level_hard = 5
-var level_easy = 1
 var LEVELS = [
-	[1, 1, 1, 1, 1], # Level 1: 4+3      #  2 2
-	[1, 1, 2, 3, 1], # Level 2: 8+7+2    #  3 3 3
-	[1, 2, 1, 1, 1], # Level 3: 4+13     #  5 5 5 5 5 <--- starting mean
-	[1, 1, 3, 4, 1], # Level 4: 6+3+8+7  #  3 3 3
-	[1, 2, 2, 2, 1], # Level 5: 7+4+46   #  2 2
+	[1, 1, 1, 2, 0], # Level 1: 4+3      #  1
+	[1, 1, 2, 3, 0], # Level 2: 8+7+2    #  2 2
+	[1, 2, 1, 1, 1], # Level 3: 4+13     #  3 3 3 <--- starting mean
+	[1, 1, 3, 4, 0], # Level 4: 6+3+8+7  #  2 2
+	[1, 2, 2, 2, 1], # Level 5: 7+4+46   #  1
 	[2, 2, 1, 0, 2], # Level 6: 23+78
 	[1, 2, 3, 3, 1], # Level 7: 3+8+6+57
 	[1, 2, 2, 1, 2], # Level 8: 7+23+78
@@ -49,14 +70,20 @@ var LEVELS = [
 	[3, 3, 2, 0, 3], # Level 13: 145+341+932
 	[3, 3, 3, 0, 4]  # Level 14: 666+145+341+932
 ]
-var e = LEVELS[level_easy-1]
-var h = LEVELS[level_hard-1]
+var level_mean = 3
+var level_distribution = [1, 2, 3, 2, 1]
+var BLOCK_SIZE = sum(level_distribution) + 1;
+var TAR_CALC_USE_HARD = 4; # ~70% of hard trials
+var TAR_CALC_USE_EASY = 1; # if they do more than this, decrease
+var calc_use_easy = 0
+var calc_use_hard = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	set_process_input(true)
+	print(BLOCK_SIZE)
 	random.randomize()
-	var qs = generate_block(BLOCK_SIZE, num_easy, e, h)
+	var qs = generate_block(level_mean, level_distribution)
 	questions = qs[0]
 	print(questions)
 	difficulties = qs[1]
@@ -84,6 +111,13 @@ func _input(ev):
 	if ev.is_action_released("ui_accept"):
 		_on_submit_pressed()
 
+func sum(list):
+	var ans = 0
+	for l in list:
+		print(l)
+		ans += l
+	return ans
+
 func generate_number(num_dig):
 	# Restrict final digit from being 0, 1, 2 or 5
 	var choices_f = [3, 4, 6, 7, 8, 9]
@@ -98,7 +132,12 @@ func generate_number(num_dig):
 	
 	return q
 
-func create_problem(min_dig, max_dig, num_ops, num_min=1, num_max=1):
+func create_problem(args):
+	var min_dig = args[0] 
+	var max_dig = args[1]
+	var num_ops = args[2]
+	var num_min = args[3]
+	var num_max = args[4]
 	var ops = []
 	for _i in range(num_min):
 		ops.append(generate_number(min_dig))
@@ -124,32 +163,46 @@ func create_problem(min_dig, max_dig, num_ops, num_min=1, num_max=1):
 	
 	return [problem, answer]
 	
-func generate_block(block_size, num_easy, e, h):
-	var questions_ = []; var questions__ = []
+func generate_block(level_mean_, level_distribution_):
+	if len(level_distribution_) % 2 == 0:
+		print('ERROR, level distribution should be odd')
+		#level_distribution_ = level_distribution_[:-1]
+	# Make sure we're never below minimum mean
+	var min_mean = int(((len(level_distribution_)-1)/2)+1)
+	level_mean_ = max(level_mean_, min_mean)
+	# Or max mean
+	var max_mean = len(LEVELS) - int(((len(level_distribution_)-1)/2))
+	level_mean_ = min(level_mean_, max_mean)
+
+	print('Mean level: %d' % level_mean_)
+	var level_range = range(int(level_mean_-((len(level_distribution_)-1)/2)),
+						int(level_mean_+((len(level_distribution_)-1)/2))+1) 
+
+	# Initiate questions and iterate through levels and generate questions
+	var questions_ = [];  var questions__ = []
 	var difficulty_ = []; var difficulty__ = []
-	for j in range(num_easy):
-		questions_.append(create_problem(e[0], e[1], e[2], e[3], e[4]))
-		difficulty_.append('e')
-	for j in range(block_size - 1 - num_easy):
-		questions_.append(create_problem(h[0], h[1], h[2], h[3], h[4]))
-		difficulty_.append('h')
-	
-	# Generate index array, shuffle
-	var ix = range(block_size-1)
+	for i in range(len(level_distribution_)):
+		var lvl = level_range[i]
+		for _j in range(level_distribution_[i]):
+			questions_.append(create_problem(LEVELS[lvl-1]))
+			if lvl < level_mean_:
+				difficulty_.append('e');
+			else:
+				difficulty_.append('h')
+
+	# Final question always easy
+	var ix = range(len(questions_))
 	random.randomize()
 	ix.shuffle()
-	print(ix)
 	for i in ix:
 		questions__.append(questions_[i])
 		difficulty__.append(difficulty_[i])
-	
+
 	# Final question always easy
-	questions__.append(create_problem(e[0], e[1], e[2], e[3], e[4]))
+	questions__.append(create_problem(LEVELS[level_range[0]-1]))
 	difficulty__.append('e')
-	print(questions__)
-	print(difficulty__)
-	
-	return [questions__, difficulty__]
+
+	return [questions__, difficulty_]
 
 func _on_Button_pressed():
 	$calcTimer.start(CALC_DELAY) # delay calc opening
@@ -167,9 +220,23 @@ func _on_taskTimer_timeout():
 	if int($timeLeft/timer.text) == 0:
 		$taskTimer.stop()
 
-func modulate_difficulty(difficulties, tar_hard, tru_hard, tar_easy, tru_easy):
+func calc_diff(lvl_, tar_h, tru_h, tar_e, tru_e):
 	# Use calculator use to modulate difficulty
-	print('A')
+	print('True hard calc usage: ' + str(tru_h))
+	print('Target hard calc usage: ' + str(tar_h))
+	print('True easy calc usage: ' + str(tru_e))
+	print('Target easy calc usage: ' + str(tar_e))
+	var lvl__ = lvl_
+	print(tru_h < tar_h)
+	print(tar_e <= tru_e)
+	if ((tru_h < tar_h) and (tru_e <= tar_e)):
+		print('True1')
+		lvl__ += 1
+	if ((tru_h > tar_h) and (tru_e > tar_e)):
+		print('True2')
+		lvl__ -= 1
+	print(lvl__)
+	return lvl__
 
 func next_question():
 	$calculator.visible = false
@@ -182,22 +249,10 @@ func next_question():
 	question += 1
 	if question == BLOCK_SIZE - 1:
 		print('FINAL BLOCK')
-		# Use calculator use to modulate difficulty
-		if calc_use_easy > TAR_CALC_USE_EASY:
-			print('Making easy problems harder')
-			level_easy = max(1, level_easy-1)
-		else:
-			print('Making easy problems easier')
-			level_easy = min(level_hard, level_easy+1)
-		if calc_use_hard <= TAR_CALC_USE_HARD:
-			print('Making hard problems harder')
-			level_hard = min(len(LEVELS), level_hard+1)
-		else:
-			print('Making hard problems easier')
-			level_hard = max(level_easy, level_hard-1)
 		
-		var qs = generate_block(BLOCK_SIZE, num_easy, 
-								LEVELS[level_easy], LEVELS[level_hard])
+		level_mean = calc_diff(level_mean, TAR_CALC_USE_HARD, calc_use_hard,
+										   TAR_CALC_USE_EASY, calc_use_easy)
+		var qs = generate_block(level_mean, level_distribution)
 		new_questions = qs[0]
 		new_difficulties = qs[1]
 	elif question == BLOCK_SIZE:
