@@ -39,6 +39,9 @@ signal show_answer
 #	}
 #}
 
+export var websocket_url = "ws://70.95.172.59:8765"
+var _client = WebSocketClient.new()
+
 var questions = []
 var difficulties = []
 var new_questions = []
@@ -80,8 +83,19 @@ var calc_use_hard = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# Set up networking stuff
+	_client.connect("connection_closed", self, "_closed")
+	_client.connect("connection_error", self, "_closed")
+	_client.connect("connection_established", self, "_connected")
+	_client.connect("data_received", self, "_on_data")
+
+	# Initiate connection to the given URL.
+	var err = _client.connect_to_url(websocket_url)
+	if err != OK:
+		print("Unable to connect")
+		set_process(false)
+		
 	set_process_input(true)
-	print(BLOCK_SIZE)
 	random.randomize()
 	var qs = generate_block(level_mean, level_distribution)
 	questions = qs[0]
@@ -103,10 +117,34 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	_client.poll()
 	$wheel.rotation_degrees += round(0.021/max(delta, 0.006)) # try to keep this constant
 	if $wheel.rotation_degrees >= 360:
 		$wheel.rotation_degrees = 0 
-		
+
+func _closed(was_clean = false):
+	# was_clean will tell you if the disconnection was correctly notified
+	# by the remote peer before closing the socket.
+	print("Closed, clean: ", was_clean)
+	set_process(false)
+	
+func _connected(proto = ""):
+	# This is called on connection, "proto" will be the selected WebSocket
+	# sub-protocol (which is optional)
+	print("Connected with protocol: ", proto)
+	# You MUST always use get_peer(1).put_packet to send data to server,
+	# and not put_packet directly when not using the MultiplayerAPI.
+	_client.get_peer(1).put_packet("Test packet".to_utf8())
+	
+func _on_data():
+	# Print the received packet, you MUST always use get_peer(1).get_packet
+	# to receive data from server, and not get_packet directly when not
+	# using the MultiplayerAPI.
+	print("Got data from server: ", _client.get_peer(1).get_packet().get_string_from_utf8())
+
+func _send_data():
+	_client.get_peer(1).put_packet(JSON.print({"test": "Test"}).to_utf8())
+
 func _input(ev):
 	if ev.is_action_released("ui_accept"):
 		_on_submit_pressed()
@@ -114,7 +152,6 @@ func _input(ev):
 func sum(list):
 	var ans = 0
 	for l in list:
-		print(l)
 		ans += l
 	return ans
 
@@ -150,7 +187,7 @@ func create_problem(args):
 		print('Warning: num_ops smaller than num_max + num_min - 1; using sum - 1 as num_ops')
 
 	# Populate remaining operators
-	for i in range(num_ops - (num_max + num_min - 1)):
+	for _i in range(num_ops - (num_max + num_min - 1)):
 		ops.append(generate_number(random.randi_range(min_dig, max_dig)))
 
 	# Generate label str and compute answer
@@ -336,3 +373,22 @@ func _on_questionTimer_timeout():
 		$feedbackTimer.start(0.1)
 		
 		next_question()
+
+func _on_saveButton_pressed():
+	var c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+	# Generate random file name
+	var fname_len = 12
+	var fname = ''
+	var ix = range(36)
+	random.randomize()
+	ix.shuffle()
+	for i in range(fname_len):
+		fname += c[ix[i]]
+	var f = File.new()
+	f.open("C:/Users/H8801/Desktop/"+fname+'.save', File.WRITE)
+	f.store_line('A')
+	f.close()
+	pass # Replace with function body.
+
+func _on_socketButton_pressed():
+	_send_data()
