@@ -227,22 +227,31 @@ position = Vector2( 152, 72 )
 scale = Vector2( 0.25, 0.25 )
 texture = SubResource( 10 )
 
-[node name="saveButton" type="Button" parent="."]
-margin_left = 368.0
-margin_top = 504.0
-margin_right = 424.0
-margin_bottom = 536.0
-text = "Save"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="socketButton" type="Button" parent="."]
 margin_left = 432.0
 margin_top = 504.0
 margin_right = 488.0
 margin_bottom = 536.0
 text = "Socket"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="dictButton" type="Button" parent="."]
+margin_left = 512.0
+margin_top = 504.0
+margin_right = 587.0
+margin_bottom = 536.0
+text = "Show Dict"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+margin_left = 717.0
+margin_top = 132.0
+margin_right = 1012.0
+margin_bottom = 512.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -256,5 +265,5 @@ __meta__ = {
 [connection signal="timeout" from="easterEggTimer" to="." method="_on_easterEggTimer_timeout"]
 [connection signal="timeout" from="equalTimer" to="." method="_on_equalTimer_timeout"]
 [connection signal="pressed" from="problem/submit" to="." method="_on_submit_pressed"]
-[connection signal="pressed" from="saveButton" to="." method="_on_saveButton_pressed"]
 [connection signal="pressed" from="socketButton" to="." method="_on_socketButton_pressed"]
+[connection signal="pressed" from="dictButton" to="." method="_on_dictButton_pressed"]

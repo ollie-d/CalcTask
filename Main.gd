@@ -38,7 +38,8 @@ signal show_answer
 #		}
 #	}
 #}
-
+var data = {'sid':'', 'block_data':{}}
+var sid = ''
 export var websocket_url = "ws://70.95.172.59:8765"
 var _client = WebSocketClient.new()
 
@@ -46,12 +47,17 @@ var questions = []
 var difficulties = []
 var new_questions = []
 var new_difficulties = []
-var question = 0 # keep track of where we are in the block
+var question = -1 # keep track of where we are in the block
 var feedbackColor = Color(0, 1, 0, 1);
 var CALC_DELAY = 0.01 # to open calc
 var MAX_DELAY = 0.01 # to get answer from equal
-var QUESTION_TIME = 20;
+var QUESTION_TIME = 20; # unused
 var block_accuracy = 0
+var block_counter = 0
+var BLOCK_PFX = 'block_'
+var block_id = BLOCK_PFX + str(block_counter)
+var Q_PFX = 'q'
+var question_id = Q_PFX + str(question)
 var delta_qtime = 0.1
 var qtime = 0;
 var random = RandomNumberGenerator.new()
@@ -83,6 +89,16 @@ var calc_use_hard = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	print(OS.get_ticks_msec())
+	# Define name
+	var c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+	var ix = range(36)
+	random.randomize()
+	randomize()
+	ix.shuffle()
+	for i in range(12):
+		sid += c[ix[i]]
+	data['sid'] = sid
 	# Set up networking stuff
 	_client.connect("connection_closed", self, "_closed")
 	_client.connect("connection_error", self, "_closed")
@@ -95,18 +111,33 @@ func _ready():
 		print("Unable to connect")
 		set_process(false)
 		
+	# Get calculator delay from server
+	MAX_DELAY = MAX_DELAY
+	data['calc_equals_delay'] = MAX_DELAY
+	
 	set_process_input(true)
-	random.randomize()
+	# Add data to our JSON
+	data['block_data'][block_id] = {}
+	data['block_data'][block_id]['mean_level'] = level_mean
+	data['block_data'][block_id]['start_time'] = OS.get_ticks_msec()
+	data['block_data'][block_id]['questions'] = {}
 	var qs = generate_block(level_mean, level_distribution)
 	questions = qs[0]
 	print(questions)
 	difficulties = qs[1]
 	print(difficulties)
 
+	next_question()
 	$problem/questionTimeProg.value = $problem/questionTimeProg.max_value
 	#$questionTimer.start(delta_qtime)
 	$problem/answer.text = ''
+	#data['block_data'][block_id]['questions'][question_id] = {}
+	#data['block_data'][block_id]['questions'][question_id]['time_left_start'] = $timeLeft/timer.text
+	#data['block_data'][block_id]['questions'][question_id]['question_display_time'] = OS.get_ticks_msec()
 	$problem.text = questions[question][0]
+	#data['block_data'][block_id]['questions'][question_id]['question'] = questions[question][0]
+	#data['block_data'][block_id]['questions'][question_id]['correct_answer'] = questions[question][1]
+	#data['block_data'][block_id]['questions'][question_id]['events'] = []
 	$taskTimer.start(1)
 	$calculator.visible = false
 	$calcButton.text =  'Calculator'
@@ -129,12 +160,7 @@ func _closed(was_clean = false):
 	set_process(false)
 	
 func _connected(proto = ""):
-	# This is called on connection, "proto" will be the selected WebSocket
-	# sub-protocol (which is optional)
 	print("Connected with protocol: ", proto)
-	# You MUST always use get_peer(1).put_packet to send data to server,
-	# and not put_packet directly when not using the MultiplayerAPI.
-	_client.get_peer(1).put_packet("Test packet".to_utf8())
 	
 func _on_data():
 	# Print the received packet, you MUST always use get_peer(1).get_packet
@@ -142,8 +168,8 @@ func _on_data():
 	# using the MultiplayerAPI.
 	print("Got data from server: ", _client.get_peer(1).get_packet().get_string_from_utf8())
 
-func _send_data():
-	_client.get_peer(1).put_packet(JSON.print({"test": "Test"}).to_utf8())
+func _send_data(data):
+	_client.get_peer(1).put_packet(JSON.print(data).to_utf8())
 
 func _input(ev):
 	if ev.is_action_released("ui_accept"):
@@ -230,6 +256,7 @@ func generate_block(level_mean_, level_distribution_):
 	# Final question always easy
 	var ix = range(len(questions_))
 	random.randomize()
+	randomize()
 	ix.shuffle()
 	for i in ix:
 		questions__.append(questions_[i])
@@ -242,6 +269,8 @@ func generate_block(level_mean_, level_distribution_):
 	return [questions__, difficulty_]
 
 func _on_Button_pressed():
+	data['block_data'][block_id]['questions'][question_id]['events'].append(['open_calc', OS.get_ticks_msec()])
+	data['block_data'][block_id]['questions'][question_id]['calculator_opened'] = 'True'
 	$calcTimer.start(CALC_DELAY) # delay calc opening
 	$calcButton.disabled = true
 	able_calculator(false)
@@ -284,37 +313,64 @@ func next_question():
 
 	# Increment question
 	question += 1
+	question_id = Q_PFX + str(question)
+	
 	if question == BLOCK_SIZE - 1:
 		print('FINAL BLOCK')
-		
 		level_mean = calc_diff(level_mean, TAR_CALC_USE_HARD, calc_use_hard,
 										   TAR_CALC_USE_EASY, calc_use_easy)
 		var qs = generate_block(level_mean, level_distribution)
 		new_questions = qs[0]
 		new_difficulties = qs[1]
 	elif question == BLOCK_SIZE:
+		block_counter += 1
+		block_id = BLOCK_PFX + str(block_counter)
+		# Add data to our JSON
+		data['block_data'][block_id] = {}
+		data['block_data'][block_id]['mean_level'] = level_mean
+		data['block_data'][block_id]['start_time'] = OS.get_ticks_msec()
+		data['block_data'][block_id]['questions'] = {}
 		question = 0
+		question_id = Q_PFX + str(question)
 		questions = new_questions
 		difficulties = new_difficulties
 	else:
 		print('Question ' + str(question))
 	
+	# Set up data storage for next question
+	print('creating new data entry for block: %s question: %s' % [block_id, question_id])
+	data['block_data'][block_id]['questions'][question_id] = {}
+	data['block_data'][block_id]['questions'][question_id]['time_left_start'] = $timeLeft/timer.text
+	data['block_data'][block_id]['questions'][question_id]['question'] = questions[question][0]
+	data['block_data'][block_id]['questions'][question_id]['correct_answer'] = questions[question][1]
+	data['block_data'][block_id]['questions'][question_id]['events'] = []
+	print(data['block_data'][block_id]['questions'][question_id])
 	$problem.text = questions[question][0]
 	$problem/answer.text = ''
 	$problem/answer.grab_focus()
 
 func _on_submit_pressed():
+	print('submit: block_id: ' + str(block_id) + ', question_id: ' + str(question_id))
+	print(data['block_data'][block_id]['questions'][question_id])
+	data['block_data'][block_id]['questions'][question_id]['time_left_end'] = $timeLeft/timer.text
+	data['block_data'][block_id]['questions'][question_id]['answered_time'] = OS.get_ticks_msec()
+	data['block_data'][block_id]['questions'][question_id]['events'].append(['submit', OS.get_ticks_msec()])
+	data['block_data'][block_id]['questions'][question_id]['user_answer'] = $problem/answer.text
 	if int($problem/answer.text) == questions[question][1]:
 		$scoreLabel/score.text = str(int($scoreLabel/score.text)+1)
 		$feedback.bbcode_text = '[color=#00FF00]+1[/color]'
+		data['block_data'][block_id]['questions'][question_id]['user_correct'] = 'True'
 		block_accuracy += 1 / (BLOCK_SIZE - 1)
 	else:
 		$scoreLabel/score.text = str(int($scoreLabel/score.text)-1)
 		$feedback.bbcode_text = '[color=#FF0000]-1[/color]'
+		data['block_data'][block_id]['questions'][question_id]['user_correct'] = 'False'
 	if int($problem/answer.text) == 28980 / (60 * 7):
 		$easterEgg.modulate.a = 1
 		$easterEgg.visible = true
 		$easterEggTimer.start(0.05)
+	
+	data['block_data'][block_id]['questions'][question_id]['score'] = $scoreLabel/score.text
 	$feedback.modulate.a = 1
 	$feedback.visible = true
 	$feedbackTimer.start(0.1)
@@ -328,6 +384,8 @@ func _on_feedbackTimer_timeout():
 		$feedback.visible = false
 
 func _on_calculator_equals_pressed():
+	data['block_data'][block_id]['questions'][question_id]['events'].append(['calc_=', OS.get_ticks_msec()])
+	data['block_data'][block_id]['questions'][question_id]['used_calculatpr'] = 'True'
 	if difficulties[question] == 'e':
 		calc_use_easy += 1
 	elif difficulties[question] == 'h':
@@ -374,21 +432,16 @@ func _on_questionTimer_timeout():
 		
 		next_question()
 
-func _on_saveButton_pressed():
-	var c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-	# Generate random file name
-	var fname_len = 12
-	var fname = ''
-	var ix = range(36)
-	random.randomize()
-	ix.shuffle()
-	for i in range(fname_len):
-		fname += c[ix[i]]
-	var f = File.new()
-	f.open("C:/Users/H8801/Desktop/"+fname+'.save', File.WRITE)
-	f.store_line('A')
-	f.close()
-	pass # Replace with function body.
-
 func _on_socketButton_pressed():
-	_send_data()
+	_send_data(data)
+
+func _notification(what):
+	# Exit gracefully
+	if (what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST):
+		_send_data({'sid': sid, 'earlyTermination': 'True'})
+		_client.disconnect_from_host()
+		get_tree().quit() # default behavior
+
+func _on_dictButton_pressed():
+	$RichTextLabel.text =  JSON.print(data, "\t")
+	#JSON.print(data, "\t"))
