@@ -8,24 +8,19 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "Reference",
-"class": "Questions",
-"language": "GDScript",
-"path": "res://questions.gd"
-} ]
+_global_script_classes=[  ]
 _global_script_class_icons={
-"Questions": ""
+
 }
 
 [application]
 
 config/name="Calc Task"
-run/main_scene="res://Main.tscn"
+run/main_scene="res://Introduction.tscn"
 
-[display]
+[autoload]
 
-window/stretch/mode="2d"
+GlobalVars="*res://GlobalVars.gd"
 
 [rendering]
 
