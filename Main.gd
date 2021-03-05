@@ -89,7 +89,6 @@ var calc_use_hard = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	print(OS.get_ticks_msec())
 	# Define name
 	var c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 	var ix = range(36)
@@ -123,9 +122,7 @@ func _ready():
 	data['block_data'][block_id]['questions'] = {}
 	var qs = generate_block(level_mean, level_distribution)
 	questions = qs[0]
-	print(questions)
 	difficulties = qs[1]
-	print(difficulties)
 
 	next_question()
 	$problem/questionTimeProg.value = $problem/questionTimeProg.max_value
@@ -265,8 +262,8 @@ func generate_block(level_mean_, level_distribution_):
 	# Final question always easy
 	questions__.append(create_problem(LEVELS[level_range[0]-1]))
 	difficulty__.append('e')
-
-	return [questions__, difficulty_]
+	
+	return [questions__, difficulty__]
 
 func _on_Button_pressed():
 	data['block_data'][block_id]['questions'][question_id]['events'].append(['open_calc', OS.get_ticks_msec()])
@@ -323,6 +320,10 @@ func next_question():
 		new_questions = qs[0]
 		new_difficulties = qs[1]
 	elif question == BLOCK_SIZE:
+		# Reset statistics
+		calc_use_easy = 0
+		calc_use_hard = 0
+		
 		block_counter += 1
 		block_id = BLOCK_PFX + str(block_counter)
 		# Add data to our JSON
@@ -341,6 +342,7 @@ func next_question():
 	print('creating new data entry for block: %s question: %s' % [block_id, question_id])
 	data['block_data'][block_id]['questions'][question_id] = {}
 	data['block_data'][block_id]['questions'][question_id]['time_left_start'] = $timeLeft/timer.text
+	data['block_data'][block_id]['questions'][question_id]['question_time_start'] = OS.get_ticks_msec()
 	data['block_data'][block_id]['questions'][question_id]['question'] = questions[question][0]
 	data['block_data'][block_id]['questions'][question_id]['correct_answer'] = questions[question][1]
 	data['block_data'][block_id]['questions'][question_id]['events'] = []
@@ -384,8 +386,7 @@ func _on_feedbackTimer_timeout():
 		$feedback.visible = false
 
 func _on_calculator_equals_pressed():
-	data['block_data'][block_id]['questions'][question_id]['events'].append(['calc_=', OS.get_ticks_msec()])
-	data['block_data'][block_id]['questions'][question_id]['used_calculatpr'] = 'True'
+	data['block_data'][block_id]['questions'][question_id]['used_calculator'] = 'True'
 	if difficulties[question] == 'e':
 		calc_use_easy += 1
 	elif difficulties[question] == 'h':
@@ -445,3 +446,6 @@ func _notification(what):
 func _on_dictButton_pressed():
 	$RichTextLabel.text =  JSON.print(data, "\t")
 	#JSON.print(data, "\t"))
+
+func _on_calculator_button_pressed(button):
+	data['block_data'][block_id]['questions'][question_id]['events'].append(['calc_'+str(button), OS.get_ticks_msec()])

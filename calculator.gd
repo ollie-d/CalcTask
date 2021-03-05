@@ -2,6 +2,7 @@
 extends PanelContainer
 
 signal equals_pressed
+signal button_pressed
 
 onready var NumPad = find_node("NumPad")
 onready var OpPad = find_node("OperationsPad")
@@ -17,6 +18,7 @@ func _ready():
 		button.connect("pressed",self,"op_pressed",[button])
 
 func num_pressed ( button ) :
+	emit_signal('button_pressed', button.get_text())
 	if is_inf(stored):
 		stored = 0
 		Display.set_text("")
@@ -35,6 +37,7 @@ func num_pressed ( button ) :
 		Display.set_text(Display.get_text() + button.get_text())
 
 func op_pressed ( button ) :
+	emit_signal('button_pressed', button.get_text())
 	if button.get_text() == "C":
 		stored = 0
 		currentOp = ""
