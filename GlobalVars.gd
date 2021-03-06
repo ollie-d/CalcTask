@@ -4,3 +4,4 @@ extends Node
 var baseline_data = {}
 var data = {}
 var sid = ''
+var MAX_DELAY = 0.01

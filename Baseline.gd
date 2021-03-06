@@ -1,45 +1,6 @@
 extends Node2D
 signal show_answer
 
-# TODO:
-# - Logging variables
-#	- log time of every button/key press in ms
-#	- log every question
-#	- log every answer
-#	- log accuracy
-#	- log mean level
-# Save things in a JSON (dict of ndicts of ndicts...)
-# {
-#	block_1
-#	{
-#		start_time: 1ms
-#		mean_level: 3
-#		q1: 
-#		{
-#			time_left: 300
-#			question_display_time: 2ms
-#			question: '2+3'
-#			correct_answer: 5
-#			user_answer: 5
-#			user_correct: True
-#			answer_time: 20ms
-#			used_calculator: True
-#			score: 1
-#			events: 
-#			[
-#				(press_calc, 1ms),
-#				('calc_3', 2ms),
-#				('calc_+', 3ms),
-#				('calc_2', 4ms),
-#				('calc_=', 5ms),
-#				('key_5', 6ms),
-#				('submit, 7ms)
-#			]
-#		}
-#	}
-#}
-#var data = {'sid':'', 'block_data':{}}
-
 var sid = ''
 export var websocket_url = "ws://70.95.172.59:8765"
 var _client = WebSocketClient.new()
@@ -52,6 +13,7 @@ var question = -1 # keep track of where we are in the block
 var feedbackColor = Color(0, 1, 0, 1);
 var CALC_DELAY = 0.01 # to open calc
 var QUESTION_TIME = 20; # unused
+var BASELINE_DELAY = 0.01
 var block_accuracy = 0
 var block_counter = 0
 var BLOCK_PFX = 'block_'
@@ -90,14 +52,14 @@ var calc_use_hard = 0
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# Define name
-	GlobalVars.data['sid'] = GlobalVars.sid + '_main'
+	GlobalVars.baseline_data['sid'] = GlobalVars.sid + '_baseline'
 	# Set up networking stuff
 	_client.connect("connection_closed", self, "_closed")
 	_client.connect("connection_error", self, "_closed")
 	_client.connect("connection_established", self, "_connected")
 	_client.connect("data_received", self, "_on_data")
 
-	# Initiate connection to the given URL
+	# Initiate connection to the given URL.
 	var err = _client.connect_to_url(websocket_url)
 	if err != OK:
 		print("Unable to connect")
@@ -105,11 +67,11 @@ func _ready():
 	
 	set_process_input(true)
 	# Add data to our JSON
-	GlobalVars.data['block_data'] = {}
-	GlobalVars.data['block_data'][block_id] = {}
-	GlobalVars.data['block_data'][block_id]['mean_level'] = level_mean
-	GlobalVars.data['block_data'][block_id]['start_time'] = OS.get_ticks_msec()
-	GlobalVars.data['block_data'][block_id]['questions'] = {}
+	GlobalVars.baseline_data['block_data'] = {}
+	GlobalVars.baseline_data['block_data'][block_id] = {}
+	GlobalVars.baseline_data['block_data'][block_id]['mean_level'] = level_mean
+	GlobalVars.baseline_data['block_data'][block_id]['start_time'] = OS.get_ticks_msec()
+	GlobalVars.baseline_data['block_data'][block_id]['questions'] = {}
 	var qs = generate_block(level_mean, level_distribution)
 	questions = qs[0]
 	difficulties = qs[1]
@@ -125,7 +87,7 @@ func _ready():
 	$wheel.visible = false
 	$wheel.modulate = Color(.58, .89, .85, 0.85)
 	$easterEgg.visible = false
-	preload("res://Conclusion.tscn")
+	preload("res://Intermission.tscn")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -254,8 +216,8 @@ func generate_block(level_mean_, level_distribution_):
 	return [questions__, difficulty__]
 
 func _on_Button_pressed():
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['events'].append(['open_calc', OS.get_ticks_msec()])
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['calculator_opened'] = 'True'
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['events'].append(['open_calc', OS.get_ticks_msec()])
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['calculator_opened'] = 'True'
 	$calcTimer.start(CALC_DELAY) # delay calc opening
 	$calcButton.disabled = true
 	able_calculator(false)
@@ -270,9 +232,9 @@ func _on_taskTimer_timeout():
 	$timeLeft/timer.text = str(int($timeLeft/timer.text) - 1)
 	if int($timeLeft/timer.text) == 0:
 		$taskTimer.stop()
-		_send_data(GlobalVars.data)
-		get_tree().change_scene("res://Conclusion.tscn")
-
+		_send_data(GlobalVars.baseline_data)
+		get_tree().change_scene("res://Intermission.tscn")
+		
 func calc_diff(lvl_, tar_h, tru_h, tar_e, tru_e):
 	# Use calculator use to modulate difficulty
 	print('True hard calc usage: ' + str(tru_h))
@@ -317,10 +279,10 @@ func next_question():
 		block_counter += 1
 		block_id = BLOCK_PFX + str(block_counter)
 		# Add data to our JSON
-		GlobalVars.data['block_data'][block_id] = {}
-		GlobalVars.data['block_data'][block_id]['mean_level'] = level_mean
-		GlobalVars.data['block_data'][block_id]['start_time'] = OS.get_ticks_msec()
-		GlobalVars.data['block_data'][block_id]['questions'] = {}
+		GlobalVars.baseline_data['block_data'][block_id] = {}
+		GlobalVars.baseline_data['block_data'][block_id]['mean_level'] = level_mean
+		GlobalVars.baseline_data['block_data'][block_id]['start_time'] = OS.get_ticks_msec()
+		GlobalVars.baseline_data['block_data'][block_id]['questions'] = {}
 		question = 0
 		question_id = Q_PFX + str(question)
 		questions = new_questions
@@ -329,36 +291,36 @@ func next_question():
 		print('Question ' + str(question))
 	
 	# Set up data storage for next question
-	GlobalVars.data['block_data'][block_id]['questions'][question_id] = {}
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['time_left_start'] = $timeLeft/timer.text
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['question_time_start'] = OS.get_ticks_msec()
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['question'] = questions[question][0]
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['correct_answer'] = questions[question][1]
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['events'] = []
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id] = {}
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['time_left_start'] = $timeLeft/timer.text
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['question_time_start'] = OS.get_ticks_msec()
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['question'] = questions[question][0]
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['correct_answer'] = questions[question][1]
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['events'] = []
 	$problem.text = questions[question][0]
 	$problem/answer.text = ''
 	$problem/answer.grab_focus()
 
 func _on_submit_pressed():
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['time_left_end'] = $timeLeft/timer.text
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['answered_time'] = OS.get_ticks_msec()
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['events'].append(['submit', OS.get_ticks_msec()])
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['user_answer'] = $problem/answer.text
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['time_left_end'] = $timeLeft/timer.text
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['answered_time'] = OS.get_ticks_msec()
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['events'].append(['submit', OS.get_ticks_msec()])
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['user_answer'] = $problem/answer.text
 	if int($problem/answer.text) == questions[question][1]:
 		$scoreLabel/score.text = str(int($scoreLabel/score.text)+1)
 		$feedback.bbcode_text = '[color=#00FF00]+1[/color]'
-		GlobalVars.data['block_data'][block_id]['questions'][question_id]['user_correct'] = 'True'
+		GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['user_correct'] = 'True'
 		block_accuracy += 1 / (BLOCK_SIZE - 1)
 	else:
 		$scoreLabel/score.text = str(int($scoreLabel/score.text)-1)
 		$feedback.bbcode_text = '[color=#FF0000]-1[/color]'
-		GlobalVars.data['block_data'][block_id]['questions'][question_id]['user_correct'] = 'False'
+		GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['user_correct'] = 'False'
 	if int($problem/answer.text) == 28980 / (60 * 7):
 		$easterEgg.modulate.a = 1
 		$easterEgg.visible = true
 		$easterEggTimer.start(0.05)
 	
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['score'] = $scoreLabel/score.text
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['score'] = $scoreLabel/score.text
 	$feedback.modulate.a = 1
 	$feedback.visible = true
 	$feedbackTimer.start(0.1)
@@ -372,14 +334,14 @@ func _on_feedbackTimer_timeout():
 		$feedback.visible = false
 
 func _on_calculator_equals_pressed():
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['used_calculator'] = 'True'
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['used_calculator'] = 'True'
 	if difficulties[question] == 'e':
 		calc_use_easy += 1
 	elif difficulties[question] == 'h':
 		calc_use_hard += 1
 	able_calculator(false)
 	$wheel.visible = true
-	$equalTimer.start(GlobalVars.MAX_DELAY)
+	$equalTimer.start(BASELINE_DELAY)
 
 func able_calculator(x):
 # If true, enable, if false, disable
@@ -420,7 +382,7 @@ func _on_questionTimer_timeout():
 		next_question()
 
 func _on_socketButton_pressed():
-	_send_data(GlobalVars.data)
+	_send_data(GlobalVars.baseline_data)
 
 func _notification(what):
 	# Exit gracefully
@@ -430,8 +392,8 @@ func _notification(what):
 		get_tree().quit() # default behavior
 
 func _on_dictButton_pressed():
-	$RichTextLabel.text =  JSON.print(GlobalVars.data, "\t")
+	$RichTextLabel.text =  JSON.print(GlobalVars.baseline_data, "\t")
 	#JSON.print(data, "\t"))
 
 func _on_calculator_button_pressed(button):
-	GlobalVars.data['block_data'][block_id]['questions'][question_id]['events'].append(['calc_'+str(button), OS.get_ticks_msec()])
+	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['events'].append(['calc_'+str(button), OS.get_ticks_msec()])
