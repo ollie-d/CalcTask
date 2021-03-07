@@ -41,7 +41,6 @@ var LEVELS = [
 	[3, 3, 2, 0, 3], # Level 13: 145+341+932
 	[3, 3, 3, 0, 4]  # Level 14: 666+145+341+932
 ]
-var level_mean = 3
 var level_distribution = [1, 2, 3, 2, 1]
 var BLOCK_SIZE = sum(level_distribution) + 1;
 var TAR_CALC_USE_HARD = 4; # ~70% of hard trials
@@ -69,10 +68,10 @@ func _ready():
 	# Add data to our JSON
 	GlobalVars.baseline_data['block_data'] = {}
 	GlobalVars.baseline_data['block_data'][block_id] = {}
-	GlobalVars.baseline_data['block_data'][block_id]['mean_level'] = level_mean
+	GlobalVars.baseline_data['block_data'][block_id]['mean_level'] = GlobalVars.level_mean
 	GlobalVars.baseline_data['block_data'][block_id]['start_time'] = OS.get_ticks_msec()
 	GlobalVars.baseline_data['block_data'][block_id]['questions'] = {}
-	var qs = generate_block(level_mean, level_distribution)
+	var qs = generate_block(GlobalVars.level_mean, level_distribution)
 	questions = qs[0]
 	difficulties = qs[1]
 
@@ -81,7 +80,7 @@ func _ready():
 	$problem/answer.text = ''
 	$problem.text = questions[question][0]
 	$taskTimer.start(1)
-	$calculator.visible = false
+	#$calculator.visible = false
 	$calcButton.text =  'Calculator'
 	$feedback.visible = false
 	$wheel.visible = false
@@ -110,10 +109,10 @@ func _on_data():
 	# to receive data from server, and not get_packet directly when not
 	# using the MultiplayerAPI.
 	var data = _client.get_peer(1).get_packet().get_string_from_utf8()
-	print("Got data from server: ", data)
+	#print("Got data from server: ", data)
 	if GlobalVars.MAX_DELAY == 0.01:
 		GlobalVars.MAX_DELAY = int(data)
-		print('Calculator delay: %d' % [GlobalVars.MAX_DELAY])
+		#print('Calculator delay: %d' % [GlobalVars.MAX_DELAY])
 
 func _send_data(data):
 	_client.get_peer(1).put_packet(JSON.print(data).to_utf8())
@@ -225,7 +224,7 @@ func _on_Button_pressed():
 func _on_calcTimer_timeout():
 	$calcTimer.stop()
 	able_calculator(true)
-	$calculator.visible = !$calculator.visible
+	#$calculator.visible = !$calculator.visible
 	$calcButton.disabled = false
 
 func _on_taskTimer_timeout():
@@ -237,24 +236,20 @@ func _on_taskTimer_timeout():
 		
 func calc_diff(lvl_, tar_h, tru_h, tar_e, tru_e):
 	# Use calculator use to modulate difficulty
-	print('True hard calc usage: ' + str(tru_h))
-	print('Target hard calc usage: ' + str(tar_h))
-	print('True easy calc usage: ' + str(tru_e))
-	print('Target easy calc usage: ' + str(tar_e))
+	#print('True hard calc usage: ' + str(tru_h))
+	#print('Target hard calc usage: ' + str(tar_h))
+	#print('True easy calc usage: ' + str(tru_e))
+	#print('Target easy calc usage: ' + str(tar_e))
 	var lvl__ = lvl_
-	print(tru_h < tar_h)
-	print(tar_e <= tru_e)
 	if ((tru_h < tar_h) and (tru_e <= tar_e)):
-		print('True1')
 		lvl__ += 1
 	if ((tru_h > tar_h) and (tru_e > tar_e)):
-		print('True2')
 		lvl__ -= 1
-	print(lvl__)
+	#print(lvl__)
 	return lvl__
 
 func next_question():
-	$calculator.visible = false
+	#$calculator.visible = false
 	$wheel.visible = false
 	$calculator.stored = 0
 	$calculator.currentOp = ""
@@ -265,10 +260,10 @@ func next_question():
 	question_id = Q_PFX + str(question)
 	
 	if question == BLOCK_SIZE - 1:
-		print('FINAL BLOCK')
-		level_mean = calc_diff(level_mean, TAR_CALC_USE_HARD, calc_use_hard,
+		#print('FINAL BLOCK')
+		GlobalVars.level_mean = calc_diff(GlobalVars.level_mean, TAR_CALC_USE_HARD, calc_use_hard,
 										   TAR_CALC_USE_EASY, calc_use_easy)
-		var qs = generate_block(level_mean, level_distribution)
+		var qs = generate_block(GlobalVars.level_mean, level_distribution)
 		new_questions = qs[0]
 		new_difficulties = qs[1]
 	elif question == BLOCK_SIZE:
@@ -280,7 +275,7 @@ func next_question():
 		block_id = BLOCK_PFX + str(block_counter)
 		# Add data to our JSON
 		GlobalVars.baseline_data['block_data'][block_id] = {}
-		GlobalVars.baseline_data['block_data'][block_id]['mean_level'] = level_mean
+		GlobalVars.baseline_data['block_data'][block_id]['mean_level'] = GlobalVars.level_mean
 		GlobalVars.baseline_data['block_data'][block_id]['start_time'] = OS.get_ticks_msec()
 		GlobalVars.baseline_data['block_data'][block_id]['questions'] = {}
 		question = 0

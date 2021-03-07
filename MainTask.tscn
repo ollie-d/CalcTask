@@ -67,6 +67,7 @@ margin_top = 8.0
 margin_right = 152.0
 
 [node name="calcButton" type="Button" parent="."]
+visible = false
 margin_left = 896.622
 margin_top = 529.516
 margin_right = 1010.62
@@ -162,6 +163,10 @@ margin_bottom = 14.372
 custom_fonts/font = SubResource( 5 )
 text = "21"
 align = 1
+max_length = 200
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="submit" type="Button" parent="problem"]
 anchor_left = 0.304
