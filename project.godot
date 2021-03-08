@@ -21,6 +21,7 @@ run/main_scene="res://Introduction.tscn"
 [autoload]
 
 GlobalVars="*res://GlobalVars.gd"
+Handshakes="*res://Handshakes.gd"
 
 [rendering]
 

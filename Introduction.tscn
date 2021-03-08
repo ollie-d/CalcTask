@@ -25,16 +25,16 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 margin_left = 16.0
-margin_top = 64.0
+margin_top = 8.0
 margin_right = 1008.0
-margin_bottom = 456.0
+margin_bottom = 475.0
 rect_pivot_offset = Vector2( -336, 32 )
 custom_fonts/font = SubResource( 1 )
 text = "You will be completing some math problems.
 
 Some of them may be more challenging than others.
 
-We created a calculator to help you with the hard ones.
+We created a calculator to help you with the hard ones. Keep in mind that the 'C' button on the calculator clears all computations, not just the previous input.
 
 Please only use this calculator and not another one on your desk or on your computer!"
 align = 1
@@ -58,9 +58,9 @@ __meta__ = {
 
 [node name="Warning" type="Label" parent="."]
 margin_left = 152.0
-margin_top = 472.0
+margin_top = 488.0
 margin_right = 883.0
-margin_bottom = 497.0
+margin_bottom = 513.0
 custom_fonts/font = SubResource( 3 )
 custom_colors/font_color = Color( 1, 0, 0, 1 )
 custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )

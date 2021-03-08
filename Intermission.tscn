@@ -29,7 +29,7 @@ text = "Nice Job!
 
 Please take a break to make sure you're not too burnt out since we have another 5 minutes of questions!
 
-This time we'll be testing a quantum-based calculator algorithm. The computation time may be slightly longer, but the answer will always be correct."
+During this  final section, we'll be testing a quantum-based calculator algorithm. The computation time may be slightly longer, but the answer will always be correct."
 align = 1
 autowrap = true
 __meta__ = {

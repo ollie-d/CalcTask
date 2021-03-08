@@ -103,6 +103,7 @@ func _closed(was_clean = false):
 	
 func _connected(proto = ""):
 	print("Connected with protocol: ", proto)
+	_send_data(Handshakes._get_handshake())
 	
 func _on_data():
 	# Print the received packet, you MUST always use get_peer(1).get_packet
@@ -292,6 +293,7 @@ func next_question():
 	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['question'] = questions[question][0]
 	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['correct_answer'] = questions[question][1]
 	GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['events'] = []
+	#print('    ' + str(questions[question][1]))
 	$problem.text = questions[question][0]
 	$problem/answer.text = ''
 	$problem/answer.grab_focus()
@@ -306,6 +308,8 @@ func _on_submit_pressed():
 		$feedback.bbcode_text = '[color=#00FF00]+1[/color]'
 		GlobalVars.baseline_data['block_data'][block_id]['questions'][question_id]['user_correct'] = 'True'
 		block_accuracy += 1 / (BLOCK_SIZE - 1)
+	elif $problem/answer.text == '!time=2':
+		$timeLeft/timer.text = '2'
 	else:
 		$scoreLabel/score.text = str(int($scoreLabel/score.text)-1)
 		$feedback.bbcode_text = '[color=#FF0000]-1[/color]'

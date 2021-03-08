@@ -31,6 +31,7 @@ func _closed(was_clean = false):
 	
 func _connected(proto = ""):
 	print("Connected with protocol: ", proto)
+	_send_data(Handshakes._get_handshake())
 	
 func _on_data():
 	# Print the received packet, you MUST always use get_peer(1).get_packet
