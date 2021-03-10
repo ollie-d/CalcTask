@@ -2,18 +2,14 @@
 
 [ext_resource path="res://fonts/coolvetica rg.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Introduction.gd" type="Script" id=2]
+[ext_resource path="res://fonts/Carlito-Regular.ttf" type="DynamicFontData" id=3]
 
 [sub_resource type="DynamicFont" id=1]
 size = 36
-font_data = ExtResource( 1 )
+font_data = ExtResource( 3 )
 
 [sub_resource type="DynamicFont" id=2]
 size = 24
-font_data = ExtResource( 1 )
-
-[sub_resource type="DynamicFont" id=3]
-size = 20
-outline_color = Color( 1, 0, 0, 1 )
 font_data = ExtResource( 1 )
 
 [node name="Node2D" type="Node2D"]
@@ -25,16 +21,14 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 margin_left = 16.0
-margin_top = 8.0
+margin_top = 128.0
 margin_right = 1008.0
-margin_bottom = 475.0
+margin_bottom = 360.0
 rect_pivot_offset = Vector2( -336, 32 )
 custom_fonts/font = SubResource( 1 )
 text = "You will be completing some math problems.
 
-Some of them may be more challenging than others.
-
-We created a calculator to help you with the hard ones. Keep in mind that the 'C' button on the calculator clears all computations, not just the previous input.
+We created a calculator to help you with the hard ones. 
 
 Please only use this calculator and not another one on your desk or on your computer!"
 align = 1
@@ -55,19 +49,5 @@ __meta__ = {
 }
 
 [node name="buttonTimer" type="Timer" parent="."]
-
-[node name="Warning" type="Label" parent="."]
-margin_left = 152.0
-margin_top = 488.0
-margin_right = 883.0
-margin_bottom = 513.0
-custom_fonts/font = SubResource( 3 )
-custom_colors/font_color = Color( 1, 0, 0, 1 )
-custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
-custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
-text = "Please only continue if this is your first time playing, otherwise please exit the program."
-__meta__ = {
-"_edit_use_anchors_": false
-}
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
 [connection signal="timeout" from="buttonTimer" to="." method="_on_buttonTimer_timeout"]

@@ -1,5 +1,5 @@
 
-extends PanelContainer
+extends CanvasLayer
 
 signal equals_pressed
 signal button_pressed

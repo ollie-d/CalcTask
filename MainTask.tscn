@@ -9,6 +9,12 @@
 [ext_resource path="res://textures/hori_under.png" type="Texture" id=7]
 [ext_resource path="res://textures/hori_over.png" type="Texture" id=8]
 
+[sub_resource type="CanvasItemMaterial" id=9]
+
+[sub_resource type="StreamTexture" id=10]
+flags = 4
+load_path = "res://.import/loading4.png-2be4f49f203ccd0ea0f265df70286fbd.stex"
+
 [sub_resource type="DynamicFont" id=1]
 size = 24
 font_data = ExtResource( 1 )
@@ -52,19 +58,17 @@ font_data = ExtResource( 2 )
 extra_spacing_char = 3
 font_data = ExtResource( 2 )
 
-[sub_resource type="CanvasItemMaterial" id=9]
-
-[sub_resource type="StreamTexture" id=10]
-flags = 4
-load_path = "res://.import/loading4.png-2be4f49f203ccd0ea0f265df70286fbd.stex"
-
 [node name="Main" type="Node2D"]
 script = ExtResource( 4 )
 
 [node name="calculator" parent="." instance=ExtResource( 5 )]
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 152.0
+layer = 0
+
+[node name="wheel" type="Sprite" parent="calculator"]
+material = SubResource( 9 )
+position = Vector2( 109, 47 )
+scale = Vector2( 0.25, 0.25 )
+texture = SubResource( 10 )
 
 [node name="calcButton" type="Button" parent="."]
 visible = false
@@ -225,12 +229,6 @@ text = "Nice"
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="wheel" type="Sprite" parent="."]
-material = SubResource( 9 )
-position = Vector2( 152, 72 )
-scale = Vector2( 0.25, 0.25 )
-texture = SubResource( 10 )
 
 [node name="socketButton" type="Button" parent="."]
 visible = false

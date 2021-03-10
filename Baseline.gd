@@ -52,6 +52,7 @@ var calc_use_hard = 0
 func _ready():
 	# Define name
 	GlobalVars.baseline_data['sid'] = GlobalVars.sid + '_baseline'
+	GlobalVars.baseline_data['calc_equals_delay'] = GlobalVars.MAX_DELAY # should be 0.01
 	# Set up networking stuff
 	_client.connect("connection_closed", self, "_closed")
 	_client.connect("connection_error", self, "_closed")
@@ -83,17 +84,17 @@ func _ready():
 	#$calculator.visible = false
 	$calcButton.text =  'Calculator'
 	$feedback.visible = false
-	$wheel.visible = false
-	$wheel.modulate = Color(.58, .89, .85, 0.85)
+	$calculator/wheel.visible = false
+	$calculator/wheel.modulate = Color(.58, .89, .85, 0.85)
 	$easterEgg.visible = false
 	preload("res://Intermission.tscn")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	_client.poll()
-	$wheel.rotation_degrees += round(0.021/max(delta, 0.006)) # try to keep this constant
-	if $wheel.rotation_degrees >= 360:
-		$wheel.rotation_degrees = 0 
+	$calculator/wheel.rotation_degrees += round(0.021/max(delta, 0.006)) # try to keep this constant
+	if $calculator/wheel.rotation_degrees >= 360:
+		$calculator/wheel.rotation_degrees = 0 
 
 func _closed(was_clean = false):
 	# was_clean will tell you if the disconnection was correctly notified
@@ -130,6 +131,8 @@ func sum(list):
 
 func generate_number(num_dig):
 	# Restrict final digit from being 0, 1, 2 or 5
+	random.randomize()
+	randomize()
 	var choices_f = [3, 4, 6, 7, 8, 9]
 	var choices_i = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 	var len_f = len(choices_f)-1
@@ -149,6 +152,8 @@ func create_problem(args):
 	var num_min = args[3]
 	var num_max = args[4]
 	var ops = []
+	random.randomize()
+	randomize()
 	for _i in range(num_min):
 		ops.append(generate_number(min_dig))
 
@@ -174,6 +179,8 @@ func create_problem(args):
 	return [problem, answer]
 	
 func generate_block(level_mean_, level_distribution_):
+	random.randomize()
+	randomize()
 	if len(level_distribution_) % 2 == 0:
 		print('ERROR, level distribution should be odd')
 		#level_distribution_ = level_distribution_[:-1]
@@ -251,7 +258,7 @@ func calc_diff(lvl_, tar_h, tru_h, tar_e, tru_e):
 
 func next_question():
 	#$calculator.visible = false
-	$wheel.visible = false
+	$calculator/wheel.visible = false
 	$calculator.stored = 0
 	$calculator.currentOp = ""
 	$calculator/Panel/VBoxContainer/Display.set_text(str(0))
@@ -339,7 +346,7 @@ func _on_calculator_equals_pressed():
 	elif difficulties[question] == 'h':
 		calc_use_hard += 1
 	able_calculator(false)
-	$wheel.visible = true
+	$calculator/wheel.visible = true
 	$equalTimer.start(BASELINE_DELAY)
 
 func able_calculator(x):
@@ -359,7 +366,7 @@ func _on_equalTimer_timeout():
 	$equalTimer.stop()
 	emit_signal("show_answer")
 	able_calculator(true)
-	$wheel.visible = false
+	$calculator/wheel.visible = false
 
 func _on_easterEggTimer_timeout():
 	$easterEgg.modulate.a -= 0.2

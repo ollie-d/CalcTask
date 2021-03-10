@@ -104,6 +104,7 @@ func _ready():
 	
 	set_process_input(true)
 	# Add data to our JSON
+	GlobalVars.data['calc_equals_delay'] = GlobalVars.MAX_DELAY
 	GlobalVars.data['block_data'] = {}
 	GlobalVars.data['block_data'][block_id] = {}
 	GlobalVars.data['block_data'][block_id]['mean_level'] = GlobalVars.level_mean
@@ -121,17 +122,17 @@ func _ready():
 	#$calculator.visible = false
 	$calcButton.text =  'Calculator'
 	$feedback.visible = false
-	$wheel.visible = false
-	$wheel.modulate = Color(.58, .89, .85, 0.85)
+	$calculator/wheel.visible = false
+	$calculator/wheel.modulate = Color(.58, .89, .85, 0.85)
 	$easterEgg.visible = false
 	preload("res://Conclusion.tscn")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	_client.poll()
-	$wheel.rotation_degrees += round(0.021/max(delta, 0.006)) # try to keep this constant
-	if $wheel.rotation_degrees >= 360:
-		$wheel.rotation_degrees = 0 
+	$calculator/wheel.rotation_degrees += round(0.021/max(delta, 0.006)) # try to keep this constant
+	if $calculator/wheel.rotation_degrees >= 360:
+		$calculator/wheel.rotation_degrees = 0 
 
 func _closed(was_clean = false):
 	# was_clean will tell you if the disconnection was correctly notified
@@ -148,7 +149,7 @@ func _on_data():
 	# to receive data from server, and not get_packet directly when not
 	# using the MultiplayerAPI.
 	var data = _client.get_peer(1).get_packet().get_string_from_utf8()
-	#print("Got data from server: ", data)
+	print("Got data from server: ", data)
 	if GlobalVars.MAX_DELAY == 0.01:
 		GlobalVars.MAX_DELAY = int(data)
 		#print('Calculator delay: %d' % [GlobalVars.MAX_DELAY])
@@ -291,7 +292,7 @@ func calc_diff(lvl_, tar_h, tru_h, tar_e, tru_e):
 
 func next_question():
 	#$calculator.visible = false
-	$wheel.visible = false
+	$calculator/wheel.visible = false
 	$calculator.stored = 0
 	$calculator.currentOp = ""
 	$calculator/Panel/VBoxContainer/Display.set_text(str(0))
@@ -378,7 +379,7 @@ func _on_calculator_equals_pressed():
 	elif difficulties[question] == 'h':
 		calc_use_hard += 1
 	able_calculator(false)
-	$wheel.visible = true
+	$calculator/wheel.visible = true
 	$equalTimer.start(GlobalVars.MAX_DELAY)
 
 func able_calculator(x):
@@ -398,7 +399,7 @@ func _on_equalTimer_timeout():
 	$equalTimer.stop()
 	emit_signal("show_answer")
 	able_calculator(true)
-	$wheel.visible = false
+	$calculator/wheel.visible = false
 
 func _on_easterEggTimer_timeout():
 	$easterEgg.modulate.a -= 0.2

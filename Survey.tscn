@@ -1,27 +1,29 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://fonts/coolvetica rg.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://Survey.gd" type="Script" id=2]
-
-[sub_resource type="DynamicFont" id=6]
-size = 36
-font_data = ExtResource( 1 )
+[ext_resource path="res://fonts/Carlito-Regular.ttf" type="DynamicFontData" id=3]
 
 [sub_resource type="DynamicFont" id=1]
 size = 36
 font_data = ExtResource( 1 )
 
 [sub_resource type="DynamicFont" id=2]
+size = 36
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=3]
 size = 24
-font_data = ExtResource( 1 )
+font_data = ExtResource( 3 )
 
-[sub_resource type="ButtonGroup" id=3]
+[sub_resource type="ButtonGroup" id=4]
 
-[sub_resource type="ButtonGroup" id=5]
-
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=5]
 size = 36
 font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=6]
+font_data = ExtResource( 3 )
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 2 )
@@ -36,7 +38,7 @@ margin_left = 200.0
 margin_top = 256.0
 margin_right = 886.0
 margin_bottom = 300.0
-custom_fonts/font = SubResource( 6 )
+custom_fonts/font = SubResource( 1 )
 text = "Thank you! You may now exit the application."
 __meta__ = {
 "_edit_use_anchors_": false
@@ -47,116 +49,55 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = 16.0
+margin_left = 24.0
 margin_top = 48.0
-margin_right = 1008.0
+margin_right = 1016.0
 margin_bottom = 96.0
 rect_pivot_offset = Vector2( -336, 32 )
-custom_fonts/font = SubResource( 1 )
-text = "How good do you think you are at mental math?"
-align = 1
+custom_fonts/font = SubResource( 2 )
+text = "How difficult did you find the problems?"
 autowrap = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VeryGood" type="CheckBox" parent="Q1"]
-margin_left = 128.0
-margin_top = 56.0
-margin_right = 263.0
-margin_bottom = 94.0
-custom_fonts/font = SubResource( 2 )
-group = SubResource( 3 )
-text = "Very Good"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Good" type="CheckBox" parent="Q1"]
-margin_left = 128.0
-margin_top = 88.0
-margin_right = 212.0
-margin_bottom = 126.0
-custom_fonts/font = SubResource( 2 )
-group = SubResource( 3 )
-text = "Good"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Neutral" type="CheckBox" parent="Q1"]
-margin_left = 128.0
-margin_top = 120.0
-margin_right = 229.0
-margin_bottom = 158.0
-custom_fonts/font = SubResource( 2 )
-group = SubResource( 3 )
-text = "Neutral"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Bad" type="CheckBox" parent="Q1"]
-margin_left = 128.0
-margin_top = 152.0
-margin_right = 212.0
-margin_bottom = 190.0
-custom_fonts/font = SubResource( 2 )
-group = SubResource( 3 )
-text = "Bad"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="VeryBad" type="CheckBox" parent="Q1"]
-margin_left = 128.0
-margin_top = 184.0
-margin_right = 247.0
-margin_bottom = 222.0
-custom_fonts/font = SubResource( 2 )
-group = SubResource( 3 )
-text = "Very Bad"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Q2" type="Label" parent="."]
+[node name="Q3" type="Label" parent="."]
+visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = 8.0
-margin_top = 304.0
-margin_right = 1000.0
-margin_bottom = 352.0
+margin_left = 24.0
+margin_top = 312.0
+margin_right = 1016.0
+margin_bottom = 360.0
 rect_pivot_offset = Vector2( -336, 32 )
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = SubResource( 2 )
 text = "Was this the only time you've played this game?"
-align = 1
 autowrap = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Yes" type="CheckBox" parent="Q2"]
-margin_left = 128.0
+[node name="Yes" type="CheckBox" parent="Q3"]
+margin_left = 56.0
 margin_top = 56.0
-margin_right = 263.0
+margin_right = 191.0
 margin_bottom = 94.0
-custom_fonts/font = SubResource( 2 )
-group = SubResource( 5 )
+custom_fonts/font = SubResource( 3 )
+group = SubResource( 4 )
 text = "Yes"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="No" type="CheckBox" parent="Q2"]
-margin_left = 128.0
+[node name="No" type="CheckBox" parent="Q3"]
+margin_left = 56.0
 margin_top = 88.0
-margin_right = 212.0
+margin_right = 140.0
 margin_bottom = 126.0
-custom_fonts/font = SubResource( 2 )
-group = SubResource( 5 )
+custom_fonts/font = SubResource( 3 )
+group = SubResource( 4 )
 text = "No"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -167,8 +108,65 @@ margin_left = 384.0
 margin_top = 520.0
 margin_right = 640.0
 margin_bottom = 584.0
-custom_fonts/font = SubResource( 4 )
-text = "Submit"
+custom_fonts/font = SubResource( 5 )
+text = "Next Page"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HSlider" type="HSlider" parent="."]
+margin_left = 224.0
+margin_top = 156.0
+margin_right = 696.0
+margin_bottom = 172.0
+value = 50.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="vdiff" type="Label" parent="HSlider"]
+margin_left = 480.0
+margin_right = 738.0
+margin_bottom = 16.0
+rect_pivot_offset = Vector2( -328, 48 )
+custom_fonts/font = SubResource( 6 )
+text = "I found the problems
+ to be very difficult"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ndiff" type="Label" parent="HSlider"]
+margin_left = -184.0
+margin_right = -8.0
+margin_bottom = 35.0
+rect_pivot_offset = Vector2( -328, 48 )
+custom_fonts/font = SubResource( 6 )
+text = "I did not find the problems 
+difficult at all"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="yourAnswer" type="Label" parent="HSlider"]
+margin_left = -184.0
+margin_top = -40.0
+margin_right = -96.0
+margin_bottom = -24.0
+rect_pivot_offset = Vector2( -328, 48 )
+custom_fonts/font = SubResource( 6 )
+text = "Your answer:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="answer" type="Label" parent="HSlider/yourAnswer"]
+margin_left = 96.0
+margin_right = 184.0
+margin_bottom = 16.0
+rect_pivot_offset = Vector2( -328, 48 )
+custom_fonts/font = SubResource( 6 )
+text = "0"
 __meta__ = {
 "_edit_use_anchors_": false
 }

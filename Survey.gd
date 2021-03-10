@@ -5,6 +5,9 @@ var state = 0
 var buttonDelay = 1
 export var websocket_url = "ws://70.95.172.59:8765"
 var _client = WebSocketClient.new()
+var Q1_ANS
+var Q2_ANS
+var Q3_ANS
 
 func _ready():
 	_client.connect("connection_closed", self, "_closed")
@@ -21,6 +24,7 @@ func _ready():
 	set_process_input(true)
 
 func _process(delta):
+	$HSlider/yourAnswer/answer.text = str($HSlider.value)
 	_client.poll()
 
 func _closed(was_clean = false):
@@ -44,19 +48,26 @@ func _send_data(data):
 	_client.get_peer(1).put_packet(JSON.print(data).to_utf8())
 
 func _on_Submit_pressed():
-	var Q1_ANS = 'None'
-	var Q2_ANS = 'None'
-	for child in $Q1.get_children():
-		if child.pressed:
-			Q1_ANS = child.text
-	for child in $Q2.get_children():
-		if child.pressed:
-			Q2_ANS = child.text
+	if $Submit.text == 'Next Page':
+		Q1_ANS = $HSlider.value
+		$Submit.text = 'Submit'
+		$Q3.visible = true
+		$Q1.text = 'How good do you think you are at mental math?'
+		$HSlider/vdiff.text = 'I think I am very' + '\r\n' + 'good at mental math'
+		$HSlider/ndiff.text = 'I think I am very' + '\r\n' + 'bad at mental math'
+		$HSlider.value = 50
+	else:
+		Q3_ANS = 'None'
+		Q2_ANS = $HSlider.value
+		for child in $Q3.get_children():
+			if child.pressed:
+				Q3_ANS = child.text
+		
+		_send_data({'sid':GlobalVars.sid + '_survey', 'Q1_diff':Q1_ANS, 'Q2_mental': Q2_ANS, 'Q3': Q3_ANS})
 	
-	_send_data({'sid':GlobalVars.sid + '_survey', 'Q1':Q1_ANS, 'Q2': Q2_ANS})
-	
-	$Q1.visible = false
-	$Q2.visible = false
-	$Submit.visible = false
-	$Label.visible = true
+		$Q1.visible = false
+		$Q3.visible = false
+		$HSlider.visible = false
+		$Submit.visible = false
+		$Label.visible = true
 	

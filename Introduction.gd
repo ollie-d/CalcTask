@@ -23,14 +23,11 @@ func _on_Button_pressed():
 	$buttonTimer.start(buttonDelay)
 	state += 1
 	if state == 1:
-		$Instructions.text = 'You will complete two sections of problems.' + '\r\n \r\n' + 'For each section, you will have 300 seconds to complete as many problems as possible.' + '\r\n\r\n' + 'Your goal is to get the highest score possible!'
+		$Instructions.text = 'Every time you solve a problem correctly, you will receive 1 point.' + '\r\n \r\n' + 'Every time you solve a problem incorrectly, you will lose 1 point.' + '\r\n \r\n' + 'Once you are ready to submit your response, either press the Submit button or press the Enter/Return key on your keyboard.'
 	elif state == 2:
-		$Instructions.text = 'Every time you solve a problem correctly, you will receive 1 point.' + '\r\n \r\n' + 'However, every time you solve a problem incorrectly, you will lose a point, so be careful!' + '\r\n \r\n' + 'Once you are ready to submit your response, either press the Submit button or press the Enter/Return key or the Spacebar on your keyboard.'
-	elif state == 3:
-		$Warning.visible = false
 		$Instructions.text =  'There are two sections to this game. You will now play the first one.'+ '\r\n \r\n' + 'Once you are ready to begin playing, click the Play button. Good luck!'
 		$Button.text = 'Play'
-	elif state == 4:
+	elif state == 3:
 		get_tree().change_scene("res://BaselineTask.tscn")
 
 func _on_buttonTimer_timeout():

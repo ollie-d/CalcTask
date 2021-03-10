@@ -15,8 +15,10 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Calc Task"
-run/main_scene="res://Introduction.tscn"
+config/name="Quick Math Online"
+config/description="How quickly can you do math? How many problems can you answer correctly before time runs out? Find out with Quick Math Online!"
+run/main_scene="res://Landing.tscn"
+config/icon="res://QMO.png"
 
 [autoload]
 
